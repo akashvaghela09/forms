@@ -17,6 +17,37 @@ const authenticate = (req, res, next) => {
     }
 };
 
+const getFormDetails = (req, res) => {
+    try {
+        const formId = req.params.formId;
+        const userEmail = req.user.email;
+
+        // Read the existing forms data
+        const formsData = JSON.parse(fs.readFileSync(formsFilePath));
+
+        // Find the form by ID
+        const formIndex = formsData.findIndex(form => form.formId === formId);
+        if (formIndex === -1) {
+            return res.status(404).json({ error: 'Form not found' });
+        }
+
+        const form = formsData[formIndex];
+
+        // Check if the user is the owner of the form
+        if (form.ownerEmail !== userEmail) {
+            return res.status(403).json({ error: 'You are not authorized to view the details of this form' });
+        }
+
+        // Create a copy of the form data excluding the responses
+        const formDataWithoutResponses = { ...form };
+        delete formDataWithoutResponses.responses;
+
+        // Return all the details of the form except the responses in the response
+        res.status(200).json({ formDetails: formDataWithoutResponses });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 const createForm = (req, res) => {
     try {
@@ -225,6 +256,7 @@ const editAllowedUsers = (req, res) => {
 
 module.exports = {
     authenticate,
+    getFormDetails,
     createForm,
     submitForm,
     toggleFormStatus,
