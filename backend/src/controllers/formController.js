@@ -92,7 +92,6 @@ const createForm = (req, res) => {
     }
 };
 
-
 const submitForm = (req, res) => {
     console.log(req.body);
     try {
@@ -254,6 +253,39 @@ const editAllowedUsers = (req, res) => {
     }
 };
 
+const getAllowedUsers = (req, res) => {
+    try {
+        const formId = req.params.formId;
+        const userEmail = req.user.email;
+
+        // Read the existing forms data
+        const formsData = JSON.parse(fs.readFileSync(formsFilePath));
+
+        // Find the form by ID
+        const formIndex = formsData.findIndex(form => form.formId === formId);
+        if (formIndex === -1) {
+            return res.status(404).json({ error: 'Form not found' });
+        }
+
+        const form = formsData[formIndex];
+
+        // Check if the user is the owner of the form
+        if (form.ownerEmail !== userEmail) {
+            return res.status(403).json({ error: 'You are not authorized to view the allowed users list for this form' });
+        }
+
+        // Check if the form is private
+        if (form.visibility !== 'private') {
+            return res.status(400).json({ error: 'This form is not private, so there is no allowed users list' });
+        }
+
+        // Return the list of allowed users for the private form
+        res.status(200).json({ allowedUsers: form.allowedUsers });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 module.exports = {
     authenticate,
     getFormDetails,
@@ -262,5 +294,6 @@ module.exports = {
     toggleFormStatus,
     getFormResponses,
     deleteForm,
+    getAllowedUsers,
     editAllowedUsers,
 };

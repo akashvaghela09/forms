@@ -8,6 +8,6 @@ router.get('/:formId', formController.authenticate, formController.getFormDetail
 router.patch('/toggle/:formId', formController.authenticate, formController.toggleFormStatus);
 router.get('/responses/:formId', formController.authenticate, formController.getFormResponses);
 router.delete('/delete/:formId', formController.authenticate, formController.deleteForm);
-router.patch('/edit-allowed-users/:formId', formController.authenticate, formController.editAllowedUsers);
+router.get('/allowed-users/:formId', formController.authenticate, formController.getAllowedUsers);
 
 module.exports = router;
