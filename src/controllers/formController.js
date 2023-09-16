@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 
 const formsFilePath = path.join(__dirname, '../data/forms.json');
 const usersFilePath = path.join(__dirname, '../data/users.json');
@@ -16,13 +17,20 @@ const authenticate = (req, res, next) => {
     }
 };
 
+
 const createForm = (req, res) => {
     try {
         const { title, description, visibility, questions } = req.body;
         const ownerEmail = req.user.email;
 
-        // Generate a unique form ID (you can use a package like uuid for this)
-        const formId = Date.now().toString();
+        // Generate a unique form ID by trimming the UUID to 6 characters
+        const formId = uuidv4().substr(0, 6);
+
+        // Add incremental numbers as IDs to each question
+        const questionsWithIds = questions.map((question, index) => ({
+            questionId: index + 1, // Start question IDs from 1
+            ...question,
+        }));
 
         // Create a new form object
         const newForm = {
@@ -31,7 +39,7 @@ const createForm = (req, res) => {
             title,
             description,
             visibility,
-            questions,
+            questions: questionsWithIds,
             responses: [],
             active: true,
             allowedUsers: visibility === 'private' ? [] : null,
@@ -43,20 +51,67 @@ const createForm = (req, res) => {
         // Add the new form to the forms data
         formsData.push(newForm);
 
-        // Write the updated forms data back to the file
+        // Save the updated forms data back to the file
         fs.writeFileSync(formsFilePath, JSON.stringify(formsData, null, 2));
 
-        // Return the form ID in the response
-        res.status(201).json({ message: 'Form created successfully', formId });
+        // Return a success message in the response
+        res.status(200).json({ message: 'Form created successfully', formId });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
+
 const submitForm = (req, res) => {
+    console.log(req.body);
     try {
-        // Your logic to submit a form response
-        // Ensure to validate the form ID, check form status, and validate user permissions based on form visibility settings
+        const formId = req.params.formId;
+        const userEmail = req.user.email;
+        const userResponses = req.body.responses; // Expecting an array of response objects with questionId and answer
+
+        // Read the existing forms data
+        const formsData = JSON.parse(fs.readFileSync(formsFilePath));
+
+        // Find the form by ID
+        const formIndex = formsData.findIndex(form => form.formId === formId);
+        if (formIndex === -1) {
+            return res.status(404).json({ error: 'Form not found' });
+        }
+
+        const form = formsData[formIndex];
+
+        // Check if the form is active
+        if (!form.active) {
+            return res.status(400).json({ error: 'Form is not active' });
+        }
+
+        // Check the form visibility settings and user permissions
+        if (form.visibility === 'private' && !form.allowedUsers.includes(userEmail)) {
+            return res.status(403).json({ error: 'You are not allowed to submit this form' });
+        }
+
+        // Check if the user has already submitted a response
+        if (form.responses.some(response => response.userEmail === userEmail)) {
+            return res.status(400).json({ error: 'You have already submitted a response' });
+        }
+
+        // Validate that all required questions have been answered
+        const answeredQuestionIds = userResponses.map(r => r.questionId);
+        const unansweredRequiredQuestions = form.questions.filter(q => q.required && !answeredQuestionIds.includes(q.questionId));
+
+        if (unansweredRequiredQuestions.length > 0) {
+            return res.status(400).json({ error: 'All required questions must be answered', unansweredRequiredQuestions });
+        }
+
+        // Add the user's response to the form's responses array
+        form.responses.push({ userEmail, responses: userResponses });
+
+        // Save the updated form data back to the file
+        formsData[formIndex] = form;
+        fs.writeFileSync(formsFilePath, JSON.stringify(formsData, null, 2));
+
+        // Return a success message in the response
+        res.status(200).json({ message: 'Form response submitted successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
