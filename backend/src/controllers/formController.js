@@ -154,8 +154,27 @@ const toggleFormStatus = (req, res) => {
 
 const getFormResponses = (req, res) => {
     try {
-        // Your logic to get all responses for a form
-        // Ensure to validate the form ID and check if the user is the owner of the form
+        const formId = req.params.formId;
+        const userEmail = req.user.email;
+
+        // Read the existing forms data
+        const formsData = JSON.parse(fs.readFileSync(formsFilePath));
+
+        // Find the form by ID
+        const formIndex = formsData.findIndex(form => form.formId === formId);
+        if (formIndex === -1) {
+            return res.status(404).json({ error: 'Form not found' });
+        }
+
+        const form = formsData[formIndex];
+
+        // Check if the user is the owner of the form
+        if (form.ownerEmail !== userEmail) {
+            return res.status(403).json({ error: 'You are not authorized to view the responses for this form' });
+        }
+
+        // Return all the responses for the form in the response
+        res.status(200).json({ responses: form.responses });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
