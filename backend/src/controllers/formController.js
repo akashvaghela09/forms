@@ -246,8 +246,45 @@ const deleteForm = (req, res) => {
 
 const editAllowedUsers = (req, res) => {
     try {
-        // Your logic to edit the list of allowed users for a form
-        // Ensure to validate the form ID and check if the user is the owner of the form
+        const formId = req.params.formId;
+        const userEmail = req.user.email;
+        const { allowedUsers } = req.body;
+
+        // Validate the allowedUsers input
+        if (!Array.isArray(allowedUsers) || allowedUsers.some(email => typeof email !== 'string')) {
+            return res.status(400).json({ error: 'Invalid allowedUsers data' });
+        }
+
+        // Read the existing forms data
+        const formsData = JSON.parse(fs.readFileSync(formsFilePath));
+
+        // Find the form by ID
+        const formIndex = formsData.findIndex(form => form.formId === formId);
+        if (formIndex === -1) {
+            return res.status(404).json({ error: 'Form not found' });
+        }
+
+        const form = formsData[formIndex];
+
+        // Check if the user is the owner of the form
+        if (form.ownerEmail !== userEmail) {
+            return res.status(403).json({ error: 'You are not authorized to edit the allowed users list for this form' });
+        }
+
+        // Check if the form is private
+        if (form.visibility !== 'private') {
+            return res.status(400).json({ error: 'This form is not private, so the allowed users list cannot be edited' });
+        }
+
+        // Update the list of allowed users for the form
+        form.allowedUsers = allowedUsers;
+
+        // Save the updated forms data back to the file
+        formsData[formIndex] = form;
+        fs.writeFileSync(formsFilePath, JSON.stringify(formsData, null, 2));
+
+        // Return a success message in the response
+        res.status(200).json({ message: 'Allowed users list updated successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

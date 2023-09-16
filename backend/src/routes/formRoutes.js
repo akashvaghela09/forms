@@ -9,5 +9,6 @@ router.patch('/toggle/:formId', formController.authenticate, formController.togg
 router.get('/responses/:formId', formController.authenticate, formController.getFormResponses);
 router.delete('/delete/:formId', formController.authenticate, formController.deleteForm);
 router.get('/allowed-users/:formId', formController.authenticate, formController.getAllowedUsers);
+router.patch('/allowed-users/:formId', formController.authenticate, formController.editAllowedUsers);
 
 module.exports = router;
