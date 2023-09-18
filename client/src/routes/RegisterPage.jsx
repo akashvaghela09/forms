@@ -32,7 +32,7 @@ const RegisterPage = () => {
                 Cookies.set('jwt', res.data.token, { expires: 1 });
 
                 await waitFor(1000);
-                navigate('/test');
+                navigate('/');
             } else {
                 console.log(res.data);
             }

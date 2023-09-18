@@ -33,7 +33,7 @@ const LoginPage = () => {
                 Cookies.set('jwt', res.data.token, { expires: 1 });
 
                 // Navigate to the dashboard
-                navigate('/test');
+                navigate('/');
             } else {
                 console.log(res.data);
             }
