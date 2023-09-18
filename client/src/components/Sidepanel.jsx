@@ -1,18 +1,34 @@
+import React, { useEffect } from "react";
 import Logo from "./Logo";
 import { BiSolidDashboard } from "react-icons/bi";
 import { MdOutlineCreate, MdOutlineLogout } from "react-icons/md";
 import { Link } from "react-router-dom";
 import Cookies from 'js-cookie';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Sidepanel = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const currentPath = location.pathname;
+    const allowedRoutes = ["/", "/create"]
+
+    const [sidepanelVisible, setSidepanelVisible] = React.useState(false);
+
     const handleLogout = () => {
         Cookies.remove('jwt');
         navigate('/login');
     }
 
+    useEffect(() => {
+        if (allowedRoutes.includes(currentPath)) {
+            setSidepanelVisible(true);
+        } else {
+            setSidepanelVisible(false);
+        }
+    }, [currentPath]);
+
     return (
+        sidepanelVisible === true &&
         <div className="w-60 h-screen border-r-2 border-slate-200 flex flex-col justify-between">
             <div>
                 <Logo />
