@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const usersFilePath = path.join(__dirname, '../data/users.json');
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const register = async (req, res) => {
     try {
@@ -22,7 +23,10 @@ const register = async (req, res) => {
         users.push(newUser);
         fs.writeFileSync(usersFilePath, JSON.stringify(users));
 
-        res.status(201).json({ message: 'User registered successfully' });
+        // Generate a JWT token for the new user
+        const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
+
+        res.status(201).json({ message: 'User registered successfully', token });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -38,7 +42,7 @@ const login = async (req, res) => {
             return res.status(400).json({ error: 'Invalid credentials' });
         }
 
-        const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET);
+        const token = jwt.sign({ email: user.email }, JWT_SECRET);
         res.json({ token });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -48,7 +52,7 @@ const login = async (req, res) => {
 const authenticate = (req, res, next) => {
     try {
         const token = req.headers.authorization.split(' ')[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, JWT_SECRET);
         req.user = decoded;
         next();
     } catch (error) {
@@ -77,7 +81,7 @@ const verify = (req, res) => {
 
     try {
         // Verify the token with the secret key
-        const decoded = jwt.verify(token, "your_jwt_secret_key");
+        const decoded = jwt.verify(token, JWT_SECRET);
 
         // If verification is successful, the token is valid
         return res.status(200).json({ message: 'JWT is valid', user: decoded, success: true });
