@@ -11,8 +11,7 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/test" element={<TestPage />} />
-        {/* <Route path="/test" element={<PrivateRoute component={TestPage} />} /> */}
+        <Route path="/test" element={<PrivateRoute component={TestPage} />} />
         <Route path="/" element={<p>HomePage</p>} />
         <Route path="*" element={<p>Page not found</p>} />
       </Routes>

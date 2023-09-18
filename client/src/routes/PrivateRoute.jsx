@@ -1,11 +1,46 @@
-import React from 'react';
-import { Route, Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
+import axios from 'axios';
+import { config } from '../configs/config';
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
-  const isAuthenticated = document.cookie.includes('jwt'); // Adjust this based on how you are storing the JWT
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const verifyJWT = async () => {
+    let token = Cookies.get('jwt');
+    if (token === undefined) {
+      setIsAuthenticated(false);
+    } else {
+      try {
+        const response = await axios.get(`${config.baseUrl}/users/verify`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+
+        if (response.data.success === true) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        setIsAuthenticated(false);
+      }
+    }
+    setIsLoading(false);
+  }
+
+  useEffect(() => {
+    verifyJWT();
+  }, []);
+
+  if (isLoading) {
+    return null; // or return a loading indicator
+  }
 
   return isAuthenticated ? (
-    <Route {...rest} element={<Component />} />
+    <Component {...rest} />
   ) : (
     <Navigate to="/login" replace />
   );
