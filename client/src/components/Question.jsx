@@ -17,7 +17,7 @@ const Question = ({ questionRequired, questionText, index, handleTextChange, han
                     onChange={e => handleAnswerType(index, e.target.value)}
                 >
                     <option value='text'>Short answer</option>
-                    <option value='file'>File upload</option>
+                    <option value='file_upload'>File upload</option>
                 </Select>
             </div>
             <div className='flex items-center'>
