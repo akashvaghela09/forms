@@ -29,7 +29,7 @@ const Sidepanel = () => {
 
     return (
         sidepanelVisible === true &&
-        <div className="w-60 h-screen border-r-2 border-slate-200 flex flex-col justify-between">
+        <div className="w-72 h-screen border-r-2 border-slate-200 flex flex-col justify-between">
             <div>
                 <Logo />
                 <div className="mt-5">
