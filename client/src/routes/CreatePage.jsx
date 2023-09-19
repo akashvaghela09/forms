@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
 import { IoMdAdd, IoMdClose, IoMdSave } from 'react-icons/io';
-import { Switch } from '@chakra-ui/react'
+import { Switch, useToast } from '@chakra-ui/react'
 import { v4 as uuid } from 'uuid';
 import Question from '../components/Question';
+import { config } from '../configs/config';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const CreatePage = () => {
+    const toast = useToast()
     const [questions, setQuestions] = useState([{ questionText: '', required: false, answerType: 'text', id: uuid() }]);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [isPrivate, setIsPrivate] = useState(false);
     const [email, setEmail] = useState('');
     const [allowedUserList, setAllowedUserList] = useState([]);
+    let token = Cookies.get('jwt');
 
     const handleAddQuestion = () => {
         setQuestions([...questions, { questionText: '', required: false, answerType: 'text', id: uuid() }]);
@@ -46,7 +51,7 @@ const CreatePage = () => {
 
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
-            if(email.length === 0){
+            if (email.length === 0) {
                 return;
             }
 
@@ -64,13 +69,61 @@ const CreatePage = () => {
         setAllowedUserList(allowedUserList.filter((_, idx) => idx !== index));
     }
 
+    const handleSubmit = async () => {
+        if (title.length === 0) {
+            toast({
+                title: 'Error',
+                description: "Title cannot be empty",
+                status: 'info',
+                duration: 5000,
+                isClosable: true,
+            })
 
-    const handleSubmit = () => {
-        console.log(questions);
-        console.log("Private => ", isPrivate);
-        console.log("Title => ", title);
-        console.log("Description => ", description);
-        console.log("Allowed User List => ", allowedUserList);
+            return;
+        }
+
+        if (questions.length === 0 || questions[0].questionText.length === 0) {
+            toast({
+                title: 'Error',
+                description: "Questions cannot be empty",
+                status: 'info',
+                duration: 5000,
+                isClosable: true,
+            })
+
+            return;
+        }
+
+        try {
+            const res = await axios.post(`${config.baseUrl}/forms/create`, {
+                title,
+                description,
+                visibility: isPrivate ? "private" : "public",
+                questions
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            toast({
+                title: res.data.formId,
+                description: res.data.message,
+                status: 'info',
+                duration: 5000,
+                isClosable: true,
+            })
+
+            setTitle('');
+            setDescription('');
+            setQuestions([{ questionText: '', required: false, answerType: 'text', id: uuid() }]);
+            setEmail('');
+            setAllowedUserList([]);
+
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     return (
@@ -116,14 +169,14 @@ const CreatePage = () => {
                                 onKeyDown={(e) => handleKeyDown(e)}
                                 className='w-full text-lg p-1 px-2 border-[1px] border-slate-300 rounded-md'
                             />
-                            <div className='flex flex-col gap-2 h-fit max-h-40 overflow-scroll hide-scrollbar' style={{padding: allowedUserList.length > 0 && "8px"}}>
+                            <div className='flex flex-col gap-2 h-fit max-h-40 overflow-scroll hide-scrollbar' style={{ padding: allowedUserList.length > 0 && "8px" }}>
                                 {
                                     allowedUserList.map((user, index) => (
                                         <div key={uuid()} className='flex justify-between items-center bg-slate-50 border-[1px] border-slate-300 rounded-md'>
                                             <p className='px-2'>{user}</p>
                                             <div
                                                 className='hover:bg-slate-200 cursor-pointer p-1 rounded-full'
-                                                onClick={() => handleRemoveEmail(index)} 
+                                                onClick={() => handleRemoveEmail(index)}
                                             >
                                                 <IoMdClose className='text-xl text-slate-600' />
                                             </div>
