@@ -1,17 +1,20 @@
 const fs = require('fs');
-const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { supabase } = require('../configs.js/config');
 
-const usersFilePath = path.join(__dirname, '../data/users.json');
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const register = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const users = JSON.parse(fs.readFileSync(usersFilePath));
-        const existingUser = users.find(u => u.email === email);
+        let { data: forms_users, error: readError } = await supabase
+            .from('forms_users')
+            .select('*');
+        if (readError) return res.status(400).json({ error: readError.message });
+
+        const existingUser = forms_users.find(u => u.email === email);
 
         if (existingUser) {
             return res.status(400).json({ error: 'User already registered' });
@@ -20,10 +23,12 @@ const register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = { email, password: hashedPassword };
 
-        users.push(newUser);
-        fs.writeFileSync(usersFilePath, JSON.stringify(users));
+        const { data, error: writeError } = await supabase
+            .from('forms_users')
+            .insert([ newUser ])
+            .select()
+        if (writeError) return res.status(400).json({ error: writeError.message });
 
-        // Generate a JWT token for the new user
         const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
 
         res.status(201).json({ message: 'User registered successfully', token });
@@ -35,8 +40,12 @@ const register = async (req, res) => {
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const users = JSON.parse(fs.readFileSync(usersFilePath));
-        const user = users.find(u => u.email === email);
+        let { data: forms_users, error: readError } = await supabase
+            .from('forms_users')
+            .select('*');
+
+        if (readError) return res.status(400).json({ error: readError.message });
+        const user = forms_users.find(item => item.email === email);
 
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(400).json({ error: 'Invalid credentials' });
