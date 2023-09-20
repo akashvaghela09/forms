@@ -233,6 +233,40 @@ const getFormResponses = async (req, res) => {
     }
 };
 
+const getFormStatus = async (req, res) => {
+    try {
+        const formId = req.params.formId;
+        const userEmail = req.user.email;
+
+        let { data: forms_generated, error: readError } = await supabase
+            .from('forms_generated')
+            .select('*')
+            .eq('formId', formId)
+            
+        if (readError) return res.status(400).json({ error: error.message });
+
+        if (forms_generated.length === 0) {
+            return res.status(404).json({ error: 'Form not found' });
+        }
+
+        let { data: forms_responses, error: readFormError } = await supabase
+            .from('forms_responses')
+            .select('*')
+            .eq('formId', formId)
+            .eq('userEmail', userEmail);
+
+        if (readFormError) return res.status(400).json({ error: error.message });
+
+        if (forms_responses.length > 0) {
+            return res.status(200).json({ status: true });
+        } else {
+            return res.status(200).json({ status: false });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 const deleteForm = async (req, res) => {
     try {
         const formId = req.params.formId;
@@ -251,7 +285,7 @@ const deleteForm = async (req, res) => {
         }
 
         const form = forms_generated[0];
-        
+
         // Check if the user is the owner of the form
         if (form.ownerEmail !== userEmail) {
             return res.status(403).json({ error: 'You are not authorized to delete this form' });
@@ -357,6 +391,7 @@ module.exports = {
     submitForm,
     toggleFormStatus,
     getFormResponses,
+    getFormStatus,
     deleteForm,
     getAllowedUsers,
     editAllowedUsers,

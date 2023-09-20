@@ -20,6 +20,9 @@ router.patch('/toggle/:formId', formController.authenticate, formController.togg
 // Get form responses
 router.get('/responses/:formId', formController.authenticate, formController.getFormResponses);
 
+// Get form submit status
+router.get('/status/:formId', formController.authenticate, formController.getFormStatus);
+
 // Delete a form
 router.delete('/delete/:formId', formController.authenticate, formController.deleteForm);
 
