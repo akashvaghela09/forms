@@ -6,7 +6,6 @@ import {
     ModalOverlay,
     ModalContent,
     ModalHeader,
-    ModalFooter,
     ModalBody,
     ModalCloseButton,
 } from '@chakra-ui/react'
@@ -24,7 +23,7 @@ const CreatePage = () => {
     const [isPrivate, setIsPrivate] = useState(false);
     const [email, setEmail] = useState('');
     const [allowedUserList, setAllowedUserList] = useState([]);
-    const [isOpen, setIsOpen] = useState(true)
+    const [isOpen, setIsOpen] = useState(false)
     const [formUrl, setFormUrl] = useState('');
 
     let token = Cookies.get('jwt');
@@ -222,7 +221,12 @@ const CreatePage = () => {
                     <ModalCloseButton />
                     <ModalBody>
                         <div className='flex items-center gap-4'>
-                            <p>{formUrl}</p>
+                            <a
+                                href={formUrl}
+                                target='_blank'
+                                rel='noreferrer'
+                                className='hover:text-blue-800'
+                            >{formUrl}</a>
                             <div onClick={() => copyText(formUrl)} className='p-2 rounded-full hover:bg-slate-200 text-slate-700 cursor-pointer active:bg-slate-300 '>
                                 <MdOutlineFileCopy className='text-xl' />
                             </div>
