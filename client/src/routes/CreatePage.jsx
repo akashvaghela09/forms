@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import { IoMdAdd, IoMdClose, IoMdSave } from 'react-icons/io';
-import { Switch, useToast } from '@chakra-ui/react'
+import { MdOutlineFileCopy } from 'react-icons/md';
+import {
+    Switch, useToast, Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    ModalCloseButton,
+} from '@chakra-ui/react'
 import { v4 as uuid } from 'uuid';
 import Question from '../components/Question';
 import { config } from '../configs/config';
@@ -15,6 +24,9 @@ const CreatePage = () => {
     const [isPrivate, setIsPrivate] = useState(false);
     const [email, setEmail] = useState('');
     const [allowedUserList, setAllowedUserList] = useState([]);
+    const [isOpen, setIsOpen] = useState(true)
+    const [formUrl, setFormUrl] = useState('');
+
     let token = Cookies.get('jwt');
 
     const handleAddQuestion = () => {
@@ -99,7 +111,8 @@ const CreatePage = () => {
                 title,
                 description,
                 visibility: isPrivate ? "private" : "public",
-                questions
+                questions,
+                allowedUserList
             }, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -107,23 +120,31 @@ const CreatePage = () => {
                 },
             });
 
-            toast({
-                title: res.data.formId,
-                description: res.data.message,
-                status: 'info',
-                duration: 5000,
-                isClosable: true,
-            })
+            let url = `https://forms.app3.in/${res.data.formId}`;
 
             setTitle('');
             setDescription('');
             setQuestions([{ questionText: '', required: false, answerType: 'text', id: uuid() }]);
             setEmail('');
             setAllowedUserList([]);
+            setFormUrl(url);
+
+            setIsOpen(true);
 
         } catch (error) {
             console.log(error);
         }
+    }
+
+    const copyText = (text) => {
+        navigator.clipboard.writeText(text);
+
+        toast({
+            title: 'Copied',
+            status: 'info',
+            duration: 1000,
+            isClosable: true,
+        })
     }
 
     return (
@@ -193,6 +214,22 @@ const CreatePage = () => {
                     <p className="text-slate-100 mt-1">Create Form</p>
                 </div>
             </div>
+
+            <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Form created successfully 🎉</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                        <div className='flex items-center gap-4'>
+                            <p>{formUrl}</p>
+                            <div onClick={() => copyText(formUrl)} className='p-2 rounded-full hover:bg-slate-200 text-slate-700 cursor-pointer active:bg-slate-300 '>
+                                <MdOutlineFileCopy className='text-xl' />
+                            </div>
+                        </div>
+                    </ModalBody>
+                </ModalContent>
+            </Modal>
         </div>
     );
 };
