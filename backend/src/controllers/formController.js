@@ -288,6 +288,11 @@ const getFormStatus = async (req, res) => {
         }
 
         let form = forms_generated[0];
+        let { visibility, allowedUsers } = form;
+
+        if(visibility === 'private' && !allowedUsers.includes(userEmail)) {
+            return res.status(403).json({ status: true, message: 'You are not allowed to view this form' });
+        }
 
         if(form.active === false) {
             return res.status(400).json({ status: true, message: 'Form is not active' });

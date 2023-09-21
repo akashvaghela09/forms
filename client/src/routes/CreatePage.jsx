@@ -111,7 +111,7 @@ const CreatePage = () => {
                 description,
                 visibility: isPrivate ? "private" : "public",
                 questions,
-                allowedUserList
+                allowedUsers: allowedUserList
             }, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
