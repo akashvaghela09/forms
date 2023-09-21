@@ -45,17 +45,40 @@ const LoginPage = () => {
         }
     }
 
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            if (email.length === 0 || password.length === 0) {
+                return;
+            }
+
+            handleLogin();
+        }
+    }
+
     return (
         <div className='h-screen flex justify-center items-center bg-slate-200'>
             <div className='flex flex-col gap-10 bg-slate-100 p-5 rounded-lg drop-shadow max-w-1/2 min-w-[400px]'>
-            <span className='flex flex-col justify-start items-start gap-2'>
+                <span className='flex flex-col justify-start items-start gap-2'>
                     <label className='text-2xl rounded-md'>Email</label>
-                    <input value={email} type='text' onChange={(e) => setEmail(e.target.value)} className='w-full p-3 text-lg rounded-md' placeholder='john@gmail.com' />
+                    <input
+                        value={email}
+                        type='text'
+                        onChange={(e) => setEmail(e.target.value)}
+                        className='w-full p-3 text-lg rounded-md'
+                        placeholder='john@gmail.com'
+                        onKeyDown={(e) => handleKeyDown(e)}
+                    />
                 </span>
 
                 <span className='flex flex-col justify-start items-start gap-2'>
                     <label className='text-2xl rounded-md'>Password</label>
-                    <input value={password} type='password' onChange={(e) => setPassword(e.target.value)} className='w-full p-3 text-lg rounded-md' placeholder='My#Secure#Password123' />
+                    <input
+                        value={password}
+                        type='password'
+                        onChange={(e) => setPassword(e.target.value)}
+                        className='w-full p-3 text-lg rounded-md' placeholder='My#Secure#Password123'
+                        onKeyDown={(e) => handleKeyDown(e)}
+                    />
                 </span>
 
                 <div className='w-full flex flex-col justify-center gap-2'>
