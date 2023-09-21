@@ -92,6 +92,24 @@ const SubmissionPage = () => {
             }
         });
 
+        let requiredQuestions = questions.filter((question) => {
+            return question.required === true;
+        });
+
+        let answeredRequiredQuestions = questions.filter((question) => {
+            return question.required === true && question.answer !== '';
+        });
+
+        if (answeredRequiredQuestions.length !== requiredQuestions.length) {
+            toast({
+                title: 'Please answer all required questions',
+                status: 'warning',
+                duration: 5000,
+                isClosable: true,
+            })
+            return;
+        }
+
         try {
             let res = await axios.post(`${config.baseUrl}/forms/submit/${id}`, {
                 responses: [...userResponse]
@@ -238,7 +256,7 @@ const SubmissionPage = () => {
                                                 {
                                                     uploadProgress !== null &&
                                                     <div className='flex items-center gap-2 w-fit p-2 border-b-[1px] border-slate-200 rounded-md bg-white hover:drop-shadow cursor-pointer'>
-                                                    {uploadProgress !== null && <p>Uploading: {uploadProgress}%</p>}
+                                                        {uploadProgress !== null && <p>Uploading: {uploadProgress}%</p>}
                                                     </div>
                                                 }
                                             </div>
