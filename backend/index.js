@@ -5,8 +5,9 @@ const cors = require('cors');
 
 app.use(cors({
     origin: [
-        'http://localhost:3000', 
-        // 'https://your-production-url.com'
+        // 'http://localhost:3000', 
+        'https://forms-app3.vercel.app',
+        'https://forms.app3.in'
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
