@@ -159,7 +159,7 @@ const getForm = async (req, res) => {
     }
 };
 
-const toggleFormStatus = async (req, res) => {
+const toggleFormActiveStatus = async (req, res) => {
     try {
         const formId = req.params.formId;
         const userEmail = req.user.email;
@@ -191,7 +191,45 @@ const toggleFormStatus = async (req, res) => {
         if (writeError) return res.status(400).json({ error: writeError.message });
 
         // Return a success message in the response
-        res.status(200).json({ message: 'Form status toggled successfully', activeStatus: form.active });
+        res.status(200).json({ message: 'Form status toggled successfully', active: form.active });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const toggleFormVisibility = async (req, res) => {
+    try {
+        const formId = req.params.formId;
+        const userEmail = req.user.email;
+
+        let { data: forms_generated, error: readError } = await supabase
+            .from('forms_generated')
+            .select('*')
+            .eq('formId', formId);
+
+        if (readError) return res.status(400).json({ error: error.message });
+
+        if (forms_generated.length === 0) {
+            return res.status(404).json({ error: 'Form not found' });
+        }
+
+        const form = forms_generated[0];
+
+        if (form.ownerEmail !== userEmail) {
+            return res.status(403).json({ error: 'You are not authorized to toggle the status of this form' });
+        }
+
+        form.visibility = form.visibility === 'public' ? 'private' : 'public';
+
+        const { data, error: writeError } = await supabase
+            .from('forms_generated')
+            .update({ visibility: form.visibility })
+            .eq('formId', formId)
+            .select()
+        if (writeError) return res.status(400).json({ error: writeError.message });
+
+        // Return a success message in the response
+        res.status(200).json({ message: 'Form status toggled successfully', visibility: form.visibility });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -389,7 +427,8 @@ module.exports = {
     getForm,
     createForm,
     submitForm,
-    toggleFormStatus,
+    toggleFormActiveStatus,
+    toggleFormVisibility,
     getFormResponses,
     getFormStatus,
     deleteForm,

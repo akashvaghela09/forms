@@ -15,7 +15,10 @@ router.get('/getAllForms', formController.authenticate, formController.getAllFor
 router.get('/:formId', formController.authenticate, formController.getForm);
 
 // Toggle form status (active/inactive)
-router.patch('/toggle/:formId', formController.authenticate, formController.toggleFormStatus);
+router.patch('/status/:formId', formController.authenticate, formController.toggleFormActiveStatus);
+
+// Toggle form visibility (public/private)
+router.patch('/visibility/:formId', formController.authenticate, formController.toggleFormVisibility);
 
 // Get form responses
 router.get('/responses/:formId', formController.authenticate, formController.getFormResponses);
