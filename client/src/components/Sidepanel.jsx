@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Logo from "./Logo";
 import { BiSolidDashboard } from "react-icons/bi";
 import { MdOutlineCreate, MdOutlineLogout } from "react-icons/md";
@@ -10,9 +10,18 @@ const Sidepanel = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const currentPath = location.pathname;
-    const allowedRoutes = ["/", "/create"]
 
-    const [sidepanelVisible, setSidepanelVisible] = React.useState(false);
+    const isAllowedRoute = (path) => {
+        // Static routes
+        const staticRoutes = ["/", "/create"];
+        if (staticRoutes.includes(path)) return true;
+        
+        // Dynamic routes
+        if (path.startsWith("/response/")) return true;
+        return false;
+    }
+
+    const [sidepanelVisible, setSidepanelVisible] = useState(false);
 
     const handleLogout = () => {
         Cookies.remove('jwt');
@@ -20,7 +29,7 @@ const Sidepanel = () => {
     }
 
     useEffect(() => {
-        if (allowedRoutes.includes(currentPath)) {
+        if (isAllowedRoute(currentPath)) {
             setSidepanelVisible(true);
         } else {
             setSidepanelVisible(false);
@@ -34,16 +43,16 @@ const Sidepanel = () => {
                 <Logo />
                 <div className="mt-5">
                     <Link to='/'>
-                    <div className="flex justify-start items-center gap-2 px-4 py-2 m-2 rounded-md cursor-pointer hover:bg-indigo-100 transform transition-all duration-100">
-                        <BiSolidDashboard className="text-xl text-slate-600" />
-                        <p className="text-slate-900">Dashboard</p>
-                    </div>
+                        <div className="flex justify-start items-center gap-2 px-4 py-2 m-2 rounded-md cursor-pointer hover:bg-indigo-100 transform transition-all duration-100">
+                            <BiSolidDashboard className="text-xl text-slate-600" />
+                            <p className="text-slate-900">Dashboard</p>
+                        </div>
                     </Link>
                     <Link to='/create'>
-                    <div className="flex justify-start items-center gap-2 px-4 py-2 m-2 rounded-md cursor-pointer hover:bg-indigo-100 transform transition-all duration-100">
-                        <MdOutlineCreate className="text-xl text-slate-600" />
-                        <p className="text-slate-900">Create Form</p>
-                    </div>
+                        <div className="flex justify-start items-center gap-2 px-4 py-2 m-2 rounded-md cursor-pointer hover:bg-indigo-100 transform transition-all duration-100">
+                            <MdOutlineCreate className="text-xl text-slate-600" />
+                            <p className="text-slate-900">Create Form</p>
+                        </div>
                     </Link>
                 </div>
             </div>
