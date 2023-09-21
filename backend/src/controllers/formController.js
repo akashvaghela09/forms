@@ -284,7 +284,13 @@ const getFormStatus = async (req, res) => {
         if (readError) return res.status(400).json({ error: error.message });
 
         if (forms_generated.length === 0) {
-            return res.status(404).json({ error: 'Form not found' });
+            return res.status(400).json({ status: true, message: 'Form not found' });
+        }
+
+        let form = forms_generated[0];
+
+        if(form.active === false) {
+            return res.status(400).json({ status: true, message: 'Form is not active' });
         }
 
         let { data: forms_responses, error: readFormError } = await supabase
@@ -296,7 +302,7 @@ const getFormStatus = async (req, res) => {
         if (readFormError) return res.status(400).json({ error: error.message });
 
         if (forms_responses.length > 0) {
-            return res.status(200).json({ status: true });
+            return res.status(200).json({ status: true, message: 'Your response has beed recorded' });
         } else {
             return res.status(200).json({ status: false });
         }
@@ -415,7 +421,7 @@ const editAllowedUsers = async (req, res) => {
             .select();
 
         // Return a success message in the response
-        res.status(200).json({ message: 'Allowed users list updated successfully' });
+        res.status(200).json({ message: 'Access list updated successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
