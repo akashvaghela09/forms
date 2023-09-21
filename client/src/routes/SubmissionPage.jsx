@@ -18,6 +18,7 @@ const SubmissionPage = () => {
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [isValid, setIsValid] = useState(null);
+    const [error, setError] = useState('');
 
     const checkFormStatus = async () => {
         try {
@@ -33,11 +34,12 @@ const SubmissionPage = () => {
             setIsValid(true);
             return true;
         } catch (error) {
-            let errorMessage = error.response.data.error;
+            let errorResponse = error.response.data.status;
 
-            if (errorMessage === 'Form not found') {
+            if (errorResponse === true) {
                 setIsValid(false);
                 setLoading(false);
+                setError(error.response.data.message);
                 return false;
             }
         }
@@ -183,7 +185,7 @@ const SubmissionPage = () => {
                     <div className='w-fit rounded-full bg-green-300'>
                         <GiBreakingChain className='text-3xl m-2 font-bold' />
                     </div>
-                    <p className='text-3xl font-bold '>Form not found </p>
+                    <p className='text-3xl font-bold '>{error}</p>
                 </div>
             }
         </div>
