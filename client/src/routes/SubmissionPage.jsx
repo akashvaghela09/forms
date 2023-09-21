@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import { config } from '../configs/config';
 import { IoMdSave } from 'react-icons/io';
-import { MdDone } from 'react-icons/md';
+import { MdDone, MdOutlineClose } from 'react-icons/md';
 import { Spinner, useToast } from '@chakra-ui/react'
 import { GiBreakingChain } from 'react-icons/gi';
 
@@ -19,6 +19,10 @@ const SubmissionPage = () => {
     const [loading, setLoading] = useState(false);
     const [isValid, setIsValid] = useState(null);
     const [error, setError] = useState('');
+    const fileInputRef = useRef(null);
+    const [fileName, setFilename] = useState('');
+    const [uploadedFileUrl, setUploadedFileUrl] = useState('');
+    const [uploadProgress, setUploadProgress] = useState(null);
 
     const checkFormStatus = async () => {
         try {
@@ -83,7 +87,8 @@ const SubmissionPage = () => {
         let userResponse = questions.map((question) => {
             return {
                 answer: question.answer,
-                questionId: question.questionId
+                questionId: question.questionId,
+                answerType: question.answerType
             }
         });
 
@@ -114,6 +119,48 @@ const SubmissionPage = () => {
                 setFormSubmitted(true);
             }
         }
+    }
+
+    const handleFileUpload = async () => {
+        fileInputRef.current.click();
+    };
+
+    const handleFileChange = async (index) => {
+        let serverRes = await axios.get("https://api.gofile.io/getServer");
+        let server = serverRes.data.data.server;
+        let serverUrl = `https://${server}.gofile.io/uploadFile`;
+
+        const formData = new FormData();
+        formData.append('file', fileInputRef.current.files[0]);
+
+        let fileNames = fileInputRef.current.files[0].name;
+        setFilename(fileNames);
+
+        try {
+            const response = await axios.post(serverUrl, formData, {
+                onUploadProgress: progressEvent => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setUploadProgress(percentCompleted);
+                }
+            });
+            if (response.data.status === 'ok') {
+                let fileUrl = response.data.data.downloadPage;
+
+                const newQuestions = [...questions];
+                newQuestions[index].answer = fileUrl;
+                setQuestions(newQuestions);
+                setUploadedFileUrl(fileUrl);
+                setUploadProgress(null);
+            }
+        } catch (error) {
+            console.error(error);
+            setUploadProgress(null);
+        }
+    };
+
+    const clearFileSelection = async (index) => {
+        setFilename('');
+        setUploadedFileUrl('');
     }
 
     useEffect(() => {
@@ -147,12 +194,55 @@ const SubmissionPage = () => {
                                                 <p className='text-left text-2xl text-red-500 mx-1'>*</p>
                                             }
                                         </span>
-                                        <input
-                                            className='w-full p-2 border-b-[1px] border-slate-200 rounded-md'
-                                            placeholder='Question'
-                                            value={question.answer}
-                                            onChange={(e) => handleTextChange(index, e.target.value)}
-                                        />
+                                        {
+                                            question.answerType === 'text' &&
+                                            <input
+                                                className='w-full p-2 border-b-[1px] border-slate-200 rounded-md'
+                                                placeholder='Answer'
+                                                value={question.answer}
+                                                onChange={(e) => handleTextChange(index, e.target.value)}
+                                            />
+                                        }
+                                        {
+                                            question.answerType === 'file_upload' &&
+                                            <div>
+                                                <input
+                                                    type="file"
+                                                    ref={fileInputRef}
+                                                    style={{ display: 'none' }}
+                                                    onChange={() => handleFileChange(index)}
+                                                />
+                                                {
+                                                    uploadProgress === null && uploadedFileUrl === '' &&
+                                                    <div
+                                                        onClick={handleFileUpload}
+                                                        className='w-fit p-2 border-b-[1px] border-slate-200 rounded-md bg-white hover:drop-shadow cursor-pointer'>
+                                                        Upload file
+                                                    </div>
+                                                }
+
+                                                {
+                                                    uploadProgress === null && uploadedFileUrl !== '' &&
+                                                    <div className='flex items-center gap-2 w-fit p-2 border-b-[1px] border-slate-200 rounded-md bg-white hover:drop-shadow cursor-pointer'>
+                                                        <a
+                                                            href={uploadedFileUrl}
+                                                            target='_blank'
+                                                            rel="noreferrer"
+                                                        >{fileName}</a>
+                                                        <div className='p-2 rounded-full hover:bg-slate-200 text-slate-700 cursor-pointer active:bg-slate-300 '>
+                                                            <MdOutlineClose onClick={() => clearFileSelection()} />
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                {
+                                                    uploadProgress !== null &&
+                                                    <div className='flex items-center gap-2 w-fit p-2 border-b-[1px] border-slate-200 rounded-md bg-white hover:drop-shadow cursor-pointer'>
+                                                    {uploadProgress !== null && <p>Uploading: {uploadProgress}%</p>}
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
                                     </div>
                                 )
                             })
