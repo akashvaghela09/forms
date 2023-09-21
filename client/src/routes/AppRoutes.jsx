@@ -6,6 +6,7 @@ import PrivateRoute from './PrivateRoute';
 import Dashboard from './Dashboard';
 import CreatePage from './CreatePage';
 import SubmissionPage from './SubmissionPage';
+import ResponsePage from './ResponsePage';
 
 const AppRoutes = () => {
   return (
@@ -18,6 +19,7 @@ const AppRoutes = () => {
         <Route path="/" element={<PrivateRoute component={Dashboard} />} />
         <Route path="/create" element={<PrivateRoute component={CreatePage} />} />
         <Route path="/:id" element={<PrivateRoute component={SubmissionPage} />} />
+        <Route path="/response/:id" element={<PrivateRoute component={ResponsePage} />} />
 
         <Route path="*" element={<p>Page not found</p>} />
       </Routes>
