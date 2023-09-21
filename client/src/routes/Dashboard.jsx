@@ -275,16 +275,7 @@ const Dashboard = () => {
                                                 </div>
                                             </Link>
                                         </Tooltip>
-                                        <Tooltip label="Graph">
-                                            <div className='p-2 rounded-full hover:bg-slate-200 text-slate-700 cursor-pointer active:bg-slate-300 '>
-                                                <AiOutlineBarChart className='text-2xl' />
-                                            </div>
-                                        </Tooltip>
-                                        <Tooltip label="Download">
-                                            <div className='p-2 rounded-full hover:bg-slate-200 text-slate-700 cursor-pointer active:bg-slate-300 '>
-                                                <MdFileDownload className='text-2xl' />
-                                            </div>
-                                        </Tooltip>
+                                       
                                         {
                                             form.visibility === 'private' &&
                                             <Tooltip label="Manage Access">
