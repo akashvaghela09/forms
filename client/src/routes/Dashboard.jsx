@@ -20,6 +20,7 @@ import { FaUserCog } from "react-icons/fa";
 import { AiOutlineBarChart } from "react-icons/ai";
 import { v4 as uuid } from 'uuid';
 import { IoMdClose } from 'react-icons/io';
+import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
     let token = Cookies.get('jwt');
@@ -186,7 +187,7 @@ const Dashboard = () => {
 
     const handleAccessListUpdate = async () => {
         try {
-            let res = await axios.patch(`${config.baseUrl}/forms/allowed-users/${tempFormId}`, {allowedUsers: allowedUserList}, {
+            let res = await axios.patch(`${config.baseUrl}/forms/allowed-users/${tempFormId}`, { allowedUsers: allowedUserList }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -268,9 +269,11 @@ const Dashboard = () => {
                                     <div className='border-b-[1px] border-slate-200' />
                                     <div className="flex justify-start gap-2 m-2 my-4">
                                         <Tooltip label="View Submissions">
-                                            <div className='p-2 rounded-full hover:bg-slate-200 text-slate-700 cursor-pointer active:bg-slate-300 '>
-                                                <MdOutlineListAlt className='text-2xl' />
-                                            </div>
+                                            <Link to={`/response/${form.formId}`}>
+                                                <div className='p-2 rounded-full hover:bg-slate-200 text-slate-700 cursor-pointer active:bg-slate-300 '>
+                                                    <MdOutlineListAlt className='text-2xl' />
+                                                </div>
+                                            </Link>
                                         </Tooltip>
                                         <Tooltip label="Graph">
                                             <div className='p-2 rounded-full hover:bg-slate-200 text-slate-700 cursor-pointer active:bg-slate-300 '>
@@ -337,12 +340,12 @@ const Dashboard = () => {
                     </ModalBody>
                     <ModalFooter>
                         <div className="flex gap-2">
-                        <button onClick={() => closeAccessModal()} className=" px-4 py-2 rounded-md cursor-pointer bg-slate-300 hover:bg-slate-200 transform transition-all duration-100">
-                            Cancel
-                        </button>
-                        <button onClick={() => handleAccessListUpdate()} className=" text-slate-50 px-4 py-2 rounded-md cursor-pointer bg-indigo-500 hover:bg-indigo-600 transform transition-all duration-100">
-                            Submit
-                        </button>
+                            <button onClick={() => closeAccessModal()} className=" px-4 py-2 rounded-md cursor-pointer bg-slate-300 hover:bg-slate-200 transform transition-all duration-100">
+                                Cancel
+                            </button>
+                            <button onClick={() => handleAccessListUpdate()} className=" text-slate-50 px-4 py-2 rounded-md cursor-pointer bg-indigo-500 hover:bg-indigo-600 transform transition-all duration-100">
+                                Submit
+                            </button>
                         </div>
                     </ModalFooter>
                 </ModalContent>
