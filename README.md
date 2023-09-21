@@ -1,7 +1,7 @@
 # Forms - Google Forms Clone
 A web application that allows users to create, distribute, and manage forms similar to Google Forms.
 
-## [Demo](https://forms.app3.in)
+## [Demo](https://forms-app3.vercel.app/)
 
 ## Features
 - User authentication (register, login, JWT validation).

@@ -119,7 +119,7 @@ const CreatePage = () => {
                 },
             });
 
-            let url = `https://forms.app3.in/${res.data.formId}`;
+            let url = `https://forms-app3.vercel.app/${res.data.formId}`;
 
             setTitle('');
             setDescription('');

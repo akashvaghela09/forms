@@ -237,13 +237,13 @@ const Dashboard = () => {
                                 <div className="p-2">
                                     <div className='flex justify-between items-center m-2'>
                                         <a
-                                            href={`https://forms.app3.in/${form.formId}`}
+                                            href={`https://forms-app3.vercel.app/${form.formId}`}
                                             target='_blank'
                                             rel='noreferrer'
                                             className='hover:text-blue-800'
-                                        >{`https://forms.app3.in/${form.formId}`}</a>
+                                        >{`https://forms-app3.vercel.app/${form.formId}`}</a>
                                         <Tooltip label="Copy Form URL">
-                                            <div onClick={() => copyText(`https://forms.app3.in/${form.formId}`)} className='p-2 rounded-full hover:bg-slate-200 text-slate-700 cursor-pointer active:bg-slate-300 '>
+                                            <div onClick={() => copyText(`https://forms-app3.vercel.app/${form.formId}`)} className='p-2 rounded-full hover:bg-slate-200 text-slate-700 cursor-pointer active:bg-slate-300 '>
                                                 <MdOutlineFileCopy className='text-xl' />
                                             </div>
                                         </Tooltip>
